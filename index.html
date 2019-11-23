@@ -1,1 +1,53 @@
-test 1
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" href="https://tdindorf.github.io/ray_diagrams/styleRays1.css">
+	<script src="scripts/svg.js"></script>
+	<script src="scripts/svg.draggy.min.js"></script>
+	
+	<script src="https://tdindorf.github.io/ray_diagrams/svg.ca_4s1.4.js"></script>
+
+	<!--script src="scripts/utils_math.2.js"></script>
+	<script src="scripts/draw_arc.js"></script>
+	<script src="scripts/svg.ca_4s1.4.js"></script-->
+
+</head>
+	
+<body>
+	
+	<script>
+
+function ca_410(me, X, Y, Ym, n=1){
+	var p = {};
+	p.arOb = [-X];
+	p.arIm = [-X/n];
+	p.arYm = [Ym];
+	p.asked = 1;
+	p.boundary = 2;
+	p.arVis = [1,1,1],
+	p.numberOfRays = 4,
+	p.deltaYm = 0.5,
+	p.polar = 1,
+	p.hide0th = 0,
+	ca_4s1(me, p)
+}
+</script>
+
+
+
+<hr/>
+
+	
+<div float='left' id="this_div" class="que calculated adaptive notyetanswered">
+	<p id="dataX">X: <input type="text" name="dataXtxt"></p>
+	<svg width=600 height=400 onLoad='ca_410(this, 3, 2, 0, 1.5)'></svg>
+	<!--svg width=500 height=300 onLoad='ca_410(this, {X2}, {Y2}, {Ym2}, {n2})'></svg-->
+ <!--p><svg width = 600 height = 400 onLoad='ca_000(this)'></svg-->
+</div>
+	
+	<div float='left' id="this_div" class="que calculated adaptive notyetanswered">
+	<p id="dataY">Y: <input type="text sumbitted" name="dataYtxt"></p>
+</div>
+</body>
+</html>
