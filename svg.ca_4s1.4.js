@@ -21,8 +21,7 @@ var defs = svg.defs();
 var markers = defs.group()
 var box = svg.group()//.dx(250).dy(150);
 
-var strStyle = "svg{fill:none;border:solid #00f 1px}text{fill:#000;text-anchor:middle}.helpCircle{fill:#0a0;stroke:#888}.helpLine{stroke:#000;stroke-dasharray:5 5}.halo{stroke:#888;stroke-dasharray:3 1}.dotObject{fill:#d00;stroke:#000}.dotImage{fill:#fa0;stroke:#000}.grab{cursor:grab;opacity:.5}.move{cursor:move;opacity:.8}.flowing{animation-name:runningRay;animation-duration:2s;animation-iteration-count:infinite;animation-timing-function:linear}.pulsating{animation-name:pulsating;animation-duration:2s;animation-iteration-count:infinite;animation-direction:alternate;animation-timing-function:ease-in-out}@keyframes runningRay{from{stroke-dashoffset:4}to{stroke-dashoffset:0}}@keyframes pulsating {from {r: 4} to {r: 6}}@keyframes runningLogRay{from{stroke-dashoffset:10}to{stroke-dashoffset:0}}.rayI{stroke:#0a0;stroke-dasharray:8 2}.rayR{stroke:#00f;stroke-dasharray:8 2}.rayV{stroke:#888;stroke-dasharray:2 8}.animLogRay{animation-name:runningLogRay;animation-duration:2s;animation-iteration-count:infinite;animation-timing-function:linear}.Min{stroke-dasharray:1,9;stroke:#888;opacity:.3}.Mid{stroke-dasharray:1,24;stroke:#8a2be2;opacity:.5}.Maj{stroke-dasharray:1,49;stroke:#00f;opacity:.8}.grid{stroke-width:500}.ticks{stroke-width:10;opacity:1}.mirror{fill:#888;opacity:.5}.water{fill:#0ff;opacity:.5}.mirrorArea{fill:transparent;cursor:crosshair}"
-
+var strStyle = getCssString();
 svg.element('style').words(strStyle)
 
 // grid
@@ -390,4 +389,8 @@ function getArYm(ym = [], rayN = 4) {
 }
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+function getCssString(){
+	return "svg{fill:none;border:solid #00f 1px}text{fill:#000;text-anchor:middle}.helpCircle{fill:#0a0;stroke:#888}.helpLine{stroke:#000;stroke-dasharray:5 5}.halo{stroke:#888;stroke-dasharray:3 1}.dotObject{fill:#d00;stroke:#000}.dotImage{fill:#fa0;stroke:#000}.grab{cursor:grab;opacity:.5}.move{cursor:move;opacity:.8}.flowing{animation-name:runningRay;animation-duration:2s;animation-iteration-count:infinite;animation-timing-function:linear}.pulsating{animation-name:pulsating;animation-duration:2s;animation-iteration-count:infinite;animation-direction:alternate;animation-timing-function:ease-in-out}@keyframes runningRay{from{stroke-dashoffset:4}to{stroke-dashoffset:0}}@keyframes pulsating {from {r: 4} to {r: 6}}@keyframes runningLogRay{from{stroke-dashoffset:10}to{stroke-dashoffset:0}}.rayI{stroke:#0a0;stroke-dasharray:8 2}.rayR{stroke:#00f;stroke-dasharray:8 2}.rayV{stroke:#888;stroke-dasharray:2 8}.animLogRay{animation-name:runningLogRay;animation-duration:2s;animation-iteration-count:infinite;animation-timing-function:linear}.Min{stroke-dasharray:1,9;stroke:#888;opacity:.3}.Mid{stroke-dasharray:1,24;stroke:#8a2be2;opacity:.5}.Maj{stroke-dasharray:1,49;stroke:#00f;opacity:.8}.grid{stroke-width:500}.ticks{stroke-width:10;opacity:1}.mirror{fill:#888;opacity:.5}.water{fill:#0ff;opacity:.5}.mirrorArea{fill:transparent;cursor:crosshair}"
+}
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
