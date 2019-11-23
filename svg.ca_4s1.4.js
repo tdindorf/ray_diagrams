@@ -32,10 +32,11 @@ var box = svg.group()//.dx(250).dy(150);
 var strStyle = getCssString();
 //svg.element('style').words(strStyle)
 
-	// add ref___ surface
-addBoundary(boundary);
+	
 // grid
-var grid = box.group().center(0,0);
+var grid = box.group().center(0,0).opacity(0.5);
+	// add ref___ surface
+addBoundary(grid, boundary);
 
 // draw background
 drawGrid(0.5*gridW/pxScale, 0.5*gridH/pxScale);
@@ -127,7 +128,7 @@ for (i = 0; i < numberOfHelpers; i++) {
 	
 	var dragRay
 	if (polar){
-		dragRay = makeDragRay(box, 2*pxScale);
+		dragRay = makeDragRay(box, 3.5*pxScale);
 		hide0th = true;
 	}
 	
@@ -221,8 +222,8 @@ function addLabels(x, y, px = 0, py = 0){
 }
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
-function addBoundary(b) {
-	var medium = box.group();
+function addBoundary(el = box, b) {
+	var medium = el.group();
 	switch (b) {
 		case 1:	// mirror
 			medium.rect(10, 300).cy(0).x(-10).addClass('mirror');
@@ -232,6 +233,7 @@ function addBoundary(b) {
 			
 		case 2: // water
 			medium.rect(250, 300).cy(0).x(-250).addClass('water');
+			medium.path('M 0 -150 v 300').addClass('waterSurface');
 			medium.rect(250, 300).cy(0).x(-250).addClass('mirrorArea');
 			medium.element('title').words('Water');
 			break;
@@ -243,41 +245,50 @@ function addBoundary(b) {
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 function helperLine(x1, y1, x2, y2) {
-	
-	var helpLine = box.line().addClass("helpLine");
-	
+
+    var helpLine = box.line().addClass(
+        "helpLine");
+
     var end1 = box
-	.use(helpCircle)
-	.center(x1, y1)
-	.draggy(dragLim);
-	
+        .use(helpCircle)
+        .center(x1, y1)
+        .draggy(dragLim);
+
     var end2 = box
-	.use(helpCircle)
-	.center(x2, y2)
-	.draggy(dragLim);
-	
+        .use(helpCircle)
+        .center(x2, y2)
+        .draggy(dragLim);
+
     function drawLine() {
-					helpLine.plot( end1.x(), end1.y(), end2.x(), end2.y() )
-				}
+        helpLine.plot(end1.x(), end1
+        .y(), end2.x(), end2.y())
+    }
     drawLine();
-    end1.on("dragmove", ev => drawLine());
-    end2.on("dragmove", ev => drawLine());
+    end1.on("dragmove", ev =>
+    drawLine());
+    end2.on("dragmove", ev =>
+    drawLine());
 }
 	
 function makeDragRay(box, x){
-   var end = box.group().draggy(dragLim);
-			var tip = end.circle(20).addClass("bigRayEnd move").center(x, 0);
-		 end.element('title').words('Drag Me')
+	  var arc = box.group(),
+							arcPath = arc.path().stroke('green').marker('end', ar_end2.stroke('black')),
+							arcLabel = arc.text('');
+   var end = box.group();
+	  end.element('title').words('Drag Me')
+	
+			var tip = end.circle(20).addClass("bigRayEnd move").center(x, 0).draggy(dragLim);
 	
 			var bigRay = box.line(0, 0, x, 0).addClass("bigRay animLogRay").marker('end', arrow_end.stroke('black'));
 	
 		function drawRay() {
-					bigRay.plot( 0, 0 , end.cx(), end.cy() )
+					bigRay.plot( 0, 0 , tip.cx(), tip.cy() );
+			  drawArc(arcPath, arcLabel, XYtoA(tip.cx(), tip.cy()), 0.75*Math.hypot(tip.cx(), tip.cy()), 1)
 				}
 		
     drawRay();
 		
-    end.on("dragmove", ev => drawRay());
+    tip.on("dragmove", ev => drawRay());
 	}
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -433,3 +444,51 @@ function getCssString(){
 	return "svg{fill:none;border:solid #00f 1px}text{fill:#000;text-anchor:middle}.helpCircle{fill:#0a0;stroke:#888}.helpLine{stroke:#000;stroke-dasharray:5 5}.halo{stroke:#888;stroke-dasharray:3 1}.dotObject{fill:#d00;stroke:#000}.dotImage{fill:#fa0;stroke:#000}.grab{cursor:grab;opacity:.5}.move{cursor:move;opacity:.8}.flowing{animation-name:runningRay;animation-duration:2s;animation-iteration-count:infinite;animation-timing-function:linear}.pulsating{animation-name:pulsating;animation-duration:2s;animation-iteration-count:infinite;animation-direction:alternate;animation-timing-function:ease-in-out}@keyframes runningRay{from{stroke-dashoffset:4}to{stroke-dashoffset:0}}@keyframes pulsating {from {r: 4} to {r: 6}}@keyframes runningLogRay{from{stroke-dashoffset:10}to{stroke-dashoffset:0}}.rayI{stroke:#0a0;stroke-dasharray:8 2}.rayR{stroke:#00f;stroke-dasharray:8 2}.rayV{stroke:#888;stroke-dasharray:2 8}.animLogRay{animation-name:runningLogRay;animation-duration:2s;animation-iteration-count:infinite;animation-timing-function:linear}.Min{stroke-dasharray:1,9;stroke:#888;opacity:.3}.Mid{stroke-dasharray:1,24;stroke:#8a2be2;opacity:.5}.Maj{stroke-dasharray:1,49;stroke:#00f;opacity:.8}.grid{stroke-width:500}.ticks{stroke-width:10;opacity:1}.mirror{fill:#888;opacity:.5}.water{fill:#0ff;opacity:.5}.mirrorArea{fill:transparent;cursor:crosshair}"
 }
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++ general math utilities +++++++++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+function r2d_r(a) {
+ return Math.round(180 * a / Math.PI);
+}
+
+function d2r(a) {
+ return Math.PI * a / 180;
+}
+
+function XYtoA(x, y) {
+ // gives angle in degrees
+ var A = r2d_r(Math.atan2(y, x));
+ return A;
+}
+
+function AtoXY(angle, radius) {
+ radius = radius || 1;
+ var q = {};
+ q.x = radius * Math.cos(d2r(angle));
+ q.y = radius * Math.sin(d2r(angle));
+ return q;
+}
+
+function stripUnits(txt) {
+ return txt.replace(/[A-Za-z°]+/, "");
+}
+
+function drawArc(arcPath, arcLabel, angle, arcRadius, blShowLabel = 0) {
+
+	var xa = AtoXY(angle, arcRadius).x; // arc point on ray, x-ccordinate
+	var ya = AtoXY(angle, arcRadius).y; // arc point on ray, y-ccordinate
+
+	var xLa = AtoXY(angle/2, 0.8*arcRadius).x; // arc label, x-ccordinate
+	var yLa = AtoXY(angle/2, 0.8*arcRadius).y; // arc label, y-ccordinate
+
+	var flags = angle > 0 ? " 0 0 1 " : " 0 0 0 ";
+	var strArcPath = "M " + arcRadius + " 0 A " + arcRadius + " " + arcRadius + flags + xa + " " + ya;
+	arcPath.plot(strArcPath) 
+
+	if (blShowLabel) {
+		arcLabel.plain(-Math.round(angle) + '\u00B0');
+		arcLabel.x(xLa).cy(yLa);
+	}
+}
