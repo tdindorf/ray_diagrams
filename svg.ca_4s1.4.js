@@ -1,37 +1,44 @@
-﻿// ++++++++++++++++++++++++++++++++++++++++++++++++++
+// ++++++++++++++++++++++++++++++++++++++++++++++++++
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 function ca_4s1(me, {arOb = [], arIm = [], arYm = [], 
-	numberOfRays = 4, 
+	numberOfRays = 4, // number of rays; 0th used for dragging
+	numberOfHelpers = 6, // number of rays; 0th used for dragging
+	polar = false,	// polar or cartesian,
+	hide0th = false, // true of dragging bigRay
+	deltaYm = 1,		// spacing of impact points on boundary = distance between rays
 	arVis = [1,1,1], // incident, ref___, virtual
 	asked = false, // 1 = image, 0 = object
 	boundary = 1, // 0: none, 1: mirror, 2 : glass/water, 3: prism, 4: lens+, 5: lens-
 	visImage = true,
 	visObject = true,
-	pxScale = 50,
+	pxScale = 50,															
 	arStart = [[4.5, 2.5], [4.5, 1.5]]	// starting positions of Object and Image
 }={} ) {
 
 arOb = getArOb(arOb);
 arIm = getArIm(arOb, arIm);
-arYm = getArYm(arYm, numberOfRays);
+	    //getArYm(ym = [], rayN = 4, yo = 1, deltaYm = 1)
+arYm = getArYm(arYm, numberOfRays, arIm[1], deltaYm);
 
 var svg = SVG(me);
-
+	
+var gridW = svg.width(),
+				gridH = svg.height();
+	
 var defs = svg.defs();
 var markers = defs.group()
 var box = svg.group()//.dx(250).dy(150);
 
 var strStyle = getCssString();
-svg.element('style').words(strStyle)
+//svg.element('style').words(strStyle)
 
+	// add ref___ surface
+addBoundary(boundary);
 // grid
 var grid = box.group().center(0,0);
 
 // draw background
-drawGrid();
-
-// add ref___ surface
-addBoundary();
+drawGrid(0.5*gridW/pxScale, 0.5*gridH/pxScale);
 
 //*********** DEF: MARKERS ******************
 
@@ -67,12 +74,12 @@ for (i = 0; i < 8; i++) {
 
 // add central dots
 dragDotOb
-.circle(4)	// in case of error with css radius
+.circle(8)	// in case of error with css radius
 .center(0, 0)
 .addClass("dotObject pulsating");
 
 dragDotIm
-.circle(4) // in case of error with css radius
+.circle(8) // in case of error with css radius
 .center(0, 0)
 .addClass("dotImage pulsating");
 
@@ -109,14 +116,21 @@ helpCircle.circle(10).center(0,0).addClass("helpCircle grab");
 helpCircle.element('title').words('drag me');
 
 // add helper lines
-for (i = 0; i < numberOfRays; i++) {
+for (i = 0; i < numberOfHelpers; i++) {
 	var x1 = 4.25 * pxScale,
 	y1 = 2.50 * pxScale - 0.5 * pxScale*i,
 	x2 = x1 + 0.50 * pxScale,
 	y2 = y1 + 0.25 * pxScale;
 	
-	helperLine(x1, y1, x2, y2, box, helpCircle, dragLim);
+	helperLine(x1, y1, x2, y2);
 }
+	
+	var dragRay
+	if (polar){
+		dragRay = makeDragRay(box, 2*pxScale);
+		hide0th = true;
+	}
+	
 
 //********* End of general startup ***************
 //***************************************
@@ -144,13 +158,14 @@ var bolSubmitted = answerFldX ? (answerFldX.hasAttribute("readonly") ? true : fa
 if (bolSubmitted) {
 	// show virtual rays
 	arVis[2] = 1;
+	hide0th = false;
 	
 	//show incident rays is asked for
 	arVis[0] = !asked;
 }
 
 // drawRayDiagram(box, arOb, arIm, arYm, arVis, ar_end2, pxScale = 50)
-drawRayDiagram(box, arOb, arIm, arYm, arVis, ar_end2, pxScale)
+drawRayDiagram(box, arOb, arIm, arYm, arVis, ar_end2, pxScale, hide0th)
 
 // which element is the one asked for (= gives data)
 var elAsked = asked ? dgrmImage : dgrmObject;
@@ -169,57 +184,59 @@ if (bolSubmitted){
 	elAsked.removeClass('move');
 }
 
-svg.viewbox(-250, -150, 500, 300)
+svg.viewbox(-gridW/2, -gridH/2, gridW, gridH)
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 // ++++++++++++ Internal Functions ++++++++++++++++++
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
-function drawGrid(){
-	var gridStr = "M -" + (5*pxScale) + " 0 h " + (10*pxScale+1) + 
-	" M 0 -" + (3*pxScale) + " v " + (6*pxScale + 1) + "";
+function drawGrid(xMax = 5, yMax = 3){
+	var gridStr = "M -" + (xMax*pxScale) + " 0 h " + (2*xMax*pxScale+1) + 
+	" M 0 -" + (yMax*pxScale) + " v " + (2*yMax*pxScale + 1) + "";
 	//var gridStr = "M 0 150 h 501 M 250 0 v 301";
 	
 	grid.path(gridStr).addClass("Maj grid");
 	grid.path(gridStr).addClass("Min grid");
 	grid.path(gridStr).addClass("Min ticks");
-	addLabels()
+	//addLabels(x, y, px = 0, py = 0)
+	addLabels(xMax-1, yMax-1, -xMax+0.3, yMax-0.3)
 }
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
-function addLabels(){
+function addLabels(x, y, px = 0, py = 0){
+	
+	// place each value on a white background
 	// x values
-	for (i=-4; i<=4; i++){
-		grid.plain(i).x(i*pxScale).cy(2.8*pxScale);
+	for (i=-x; i<=x; i++){
+		grid.rect(20,20).cx(i*pxScale).cy(py*pxScale).addClass('text_background');
+		grid.plain(i).x(i*pxScale).cy(py*pxScale);
 	}
 	
 	// y values, negative
-	for (i=-2; i<=2; i++){
-		grid.plain(-i).cy(i*pxScale).x(-4.75*pxScale);
+	for (i=-y; i<=y; i++){
+		grid.rect(20,20).addClass('back').cy(i*pxScale).cx(px*pxScale);
+		grid.plain(-i).cy(i*pxScale).x(px*pxScale);
 	}
 }
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
-function addBoundary() {
-    switch (boundary) {
-        case 1:
-		
-		var mirror = box.group()
-		mirror.rect(10, 300).cy(0).x(-10).addClass('mirror');
-		mirror.rect(20, 300).cy(0).x(-10).addClass('mirrorArea');
-		mirror.element('title').words('Mirror');
-		break;
-		
-		case 2:
-		
-		var mirror = box.group()
-		mirror.rect(250, 300).cy(0).x(-250).addClass('water');
-		mirror.rect(250, 300).cy(0).x(-250).addClass('mirrorArea');
-		mirror.element('title').words('Water');
-		break;
-		
-        default:
+function addBoundary(b) {
+	var medium = box.group();
+	switch (b) {
+		case 1:	// mirror
+			medium.rect(10, 300).cy(0).x(-10).addClass('mirror');
+			medium.rect(20, 300).cy(0).x(-10).addClass('mirrorArea');
+			medium.element('title').words('Mirror');
+			break;
+			
+		case 2: // water
+			medium.rect(250, 300).cy(0).x(-250).addClass('water');
+			medium.rect(250, 300).cy(0).x(-250).addClass('mirrorArea');
+			medium.element('title').words('Water');
+			break;
+		default:
+			// none
 	}
 	
 }
@@ -227,7 +244,7 @@ function addBoundary() {
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 function helperLine(x1, y1, x2, y2) {
 	
-	var helpLine = box.path().addClass("helpLine");
+	var helpLine = box.line().addClass("helpLine");
 	
     var end1 = box
 	.use(helpCircle)
@@ -240,14 +257,28 @@ function helperLine(x1, y1, x2, y2) {
 	.draggy(dragLim);
 	
     function drawLine() {
-        helpLine.plot(
-            "M " + end1.x() + " " + end1.y() + " " + end2.x() + " " + end2.y()
-		);
-	}
+					helpLine.plot( end1.x(), end1.y(), end2.x(), end2.y() )
+				}
     drawLine();
     end1.on("dragmove", ev => drawLine());
     end2.on("dragmove", ev => drawLine());
 }
+	
+function makeDragRay(box, x){
+   var end = box.group().draggy(dragLim);
+			var tip = end.circle(20).addClass("bigRayEnd move").center(x, 0);
+		 end.element('title').words('Drag Me')
+	
+			var bigRay = box.line(0, 0, x, 0).addClass("bigRay animLogRay").marker('end', arrow_end.stroke('black'));
+	
+		function drawRay() {
+					bigRay.plot( 0, 0 , end.cx(), end.cy() )
+				}
+		
+    drawRay();
+		
+    end.on("dragmove", ev => drawRay());
+	}
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 function placeElement(elem, coords){
@@ -265,7 +296,7 @@ function placeElement(elem, coords){
 
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
-function drawRayDiagram(box, arOb, arIm, arYm, arVis, ar_end2, pxScale = 50) {
+function drawRayDiagram(box, arOb, arIm, arYm, arVis, ar_end2, pxScale = 50, hide0th) {
 	// bIm, bRe, bVi: booleans of which rays shown;
 	// usualy bVi = 1 after submission
 	
@@ -277,26 +308,32 @@ function drawRayDiagram(box, arOb, arIm, arYm, arVis, ar_end2, pxScale = 50) {
 	var vRaysGrp = box.group().addClass("rayV animLogRay");
 	
 	arYm = arYm.map((e) => -e * pxScale)
+	
+	// prepare object coordinates
 	var xo = arOb[0] * pxScale,
 	yo = -arOb[1] * pxScale,
-	// in case of mirror
+					
+	// prepare image coordinates if empty
+	// assume mirror
 	xi = arIm[0] ? arIm[0] * pxScale : -xo,
 	yi = arIm[1] ? -arIm[1] * pxScale : yo,
+					
+	// length of refracted ray
 	xr = 3.5 * pxScale;
 	
 	
     var strPath = "";
     var yr = 0;
     var rayArPos = 0.8; // fraction along the length of the inciden ray where arrow-mid marker is placed
-	var scaleR = 1;
+	   var scaleR = 1;
 	
-    for (var j = 0; j < arYm.length; j++) {
+    for (var j = hide0th ? 1 : 0; j < arYm.length; j++) {
 		
         yr = (arYm[j] - yi) * (xr / -xi);
 		
 		// make all r_ rays equal length
 		scaleR = xr/Math.hypot(xr, yr);
-		
+
 		if (arVis[0]){
 			// draw Incident ray
 			strPath = "M " + xo + " " + yo + " L " + (1 - rayArPos) * xo + " " + (yo + rayArPos * (arYm[j] - yo)) + " 0 " + arYm[j];
@@ -369,18 +406,20 @@ function getYm0(ym = []) {
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 // returns ym array of impact points
-function getArYm(ym = [], rayN = 4) {
+function getArYm(ym = [], rayN = 4, yo = 1, deltaYm = 1) {
     // generate array ym[] of impact points
     // i.e. where incident rays strike
+	   // rayN: number of rays
+	   // deltaYm: separation of impact points
 	
 	ym = getYm0(ym);
 	
-	var dym = 0.6; //separation of impact points
-	var s = 1,
+	// plot more rays closer to the image
+	var s = ym[0] > yo ? -1 : 1,
 	k = 1,
 	f = 1;
 	while (k < rayN) {
-		ym[k] = ym[0] + s * f * dym;
+		ym[k] = ym[0] + s * f * deltaYm;
 		s = -s;
 		k ++;
 		f = Math.ceil(k / 2);
