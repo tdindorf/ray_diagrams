@@ -1,3 +1,12 @@
+answerFldX, textarea {
+	background-color : red;
+	fill : green;
+}
+
+input, textarea {
+  --background-color : #ddd;
+}
+
 svg {
  fill: none;
 	border: solid #00f 1px;
@@ -26,6 +35,11 @@ text {
 
 .dotImage {
 	fill: #f90;
+	stroke: #000;
+}
+
+.dotFocus {
+	fill: transparent;
 	stroke: #000;
 }
 
@@ -95,7 +109,7 @@ text {
 }
 
 .grid {
-	stroke-width: 600;
+	stroke-width: 800;
 	pointer-events: none;
 }
 
@@ -117,6 +131,12 @@ text {
 .water {
 	fill: aqua;
 	opacity: .2;
+}
+
+.lens {
+	fill: aqua;
+	stroke: blue;
+	opacity: 1;
 }
 
 .waterSurface {
