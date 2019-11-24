@@ -5,27 +5,23 @@
 	<link rel="stylesheet" type="text/css" href="styleRays1.css">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.7.1/svg.min.js"></script>
 	<script src="svg.draggy3.js"></script>
-	
-	<script src="svg.ca_4s1.4.js"></script>
+	<script src="svg.ca_4s1.5.js"></script>
 
 </head>
 	
 <body>
-	
-	<script>
 
-function ca_410(me, X, Y, Ym, n=1){
+	function ca_410(me, X, Y, Ym, n=1){
 	var p = {};
 	p.arOb = [-X];
 	p.arIm = [-X/n];
 	p.arYm = [Ym];
-	p.asked = 1;
-	p.boundary = 2;
-	p.arVis = [1,1,1],
+	p.asked = 2;
+	p.boundary = 3;
+	p.arVis = [0,1,0],
 	p.numberOfRays = 4,
 	p.deltaYm = 0.5,
-	p.polar = 1,
-	p.hide0th = 0,
+	p.arShown = [1,1,1,1]
 	ca_4s1(me, p)
 }
 </script>
@@ -33,13 +29,16 @@ function ca_410(me, X, Y, Ym, n=1){
 
 
 <hr/>
-	<div float='left' id="this_div" class="que calculated adaptive notyetanswered">
-	<p id="dataX">X: <input type="text" name="dataXtxt"></p>
-	<svg width=600 height=400 onLoad='ca_410(this, 3, 2, 0, 1.5)'></svg>
-	</div>
+
+	
+<div float='left' id="this_div" class="que calculated adaptive notyetanswered">
+	<p id="dataX">X: <input type="text" name="dataXtxt" ></p>
+	<svg width=700 height=300 onLoad='ca_410(this, 3, 2, 0, 1.5)'></svg>
+</div>
 	
 	<div float='left' id="this_div" class="que calculated adaptive notyetanswered">
-	<p id="dataY">Y: <input type="text" name="dataYtxt"></p>
-	</div>
+	<p id="dataY">Y: <input type="text" name="dataYtxt" ></p>
+</div>
+
 </body>
 </html>
